@@ -21,10 +21,11 @@ Freelance/gig platforms dump every open listing on every user. Sorting through t
 ## Roadmap
 
 - [x] Project scaffold + FastAPI skeleton
-- [ ] Postgres schema (users, listings, applications)
-- [ ] Embedding pipeline for gig listings + user profiles
-- [ ] Vector DB storage + semantic retrieval
-- [ ] RAG-based matching: retrieve relevant listings for a profile
+- [x] Postgres schema (gigs table, more to follow: users, applications)
+- [x] Embedding pipeline for gig listings (sentence-transformers, local)
+- [x] Vector DB storage + semantic retrieval (FAISS)
+- [x] `POST /gigs/search` — semantic search: profile text → ranked matching gigs
+- [x] `POST /gigs/recommend` — full RAG pipeline: retrieval + grounded LLM explanation (Gemini)
 - [ ] LangGraph agent: rank listings by fit + win-likelihood
 - [ ] Multi-agent layer (router + matcher + explainer agents)
 - [ ] Dockerize + deploy

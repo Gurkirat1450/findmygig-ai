@@ -17,3 +17,22 @@ class GigOut(GigBase):
 
     class Config:
         from_attributes = True
+
+
+class GigSearchQuery(BaseModel):
+    profile_text: str = Field(
+        ...,
+        examples=["Python developer with FastAPI, LangChain, and RAG experience"],
+        description="Free-text description of the user's skills/experience to match against.",
+    )
+    top_k: int = Field(default=5, ge=1, le=20)
+
+
+class GigSearchResult(BaseModel):
+    gig: GigOut
+    similarity_score: float
+
+
+class GigRecommendResponse(BaseModel):
+    gigs: list[GigOut]
+    explanation: str

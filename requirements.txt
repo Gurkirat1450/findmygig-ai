@@ -4,9 +4,10 @@ pydantic==2.9.2
 python-dotenv==1.0.1
 sqlalchemy==2.0.35
 psycopg2-binary==2.9.9
+sentence-transformers==3.1.1
+faiss-cpu==1.9.0
+google-generativeai==0.8.3
 
 # Coming in Week 1-2:
 # langchain
 # langgraph
-# faiss-cpu  # or chromadb
-# openai / huggingface-hub
