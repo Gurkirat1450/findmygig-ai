@@ -26,8 +26,9 @@ Freelance/gig platforms dump every open listing on every user. Sorting through t
 - [x] Vector DB storage + semantic retrieval (FAISS)
 - [x] `POST /gigs/search` — semantic search: profile text → ranked matching gigs
 - [x] `POST /gigs/recommend` — full RAG pipeline: retrieval + grounded LLM explanation (Gemini)
-- [ ] LangGraph agent: rank listings by fit + win-likelihood
-- [ ] Multi-agent layer (router + matcher + explainer agents)
+- [x] `POST /gigs/recommend-langchain` — same pipeline rebuilt with LangChain retriever + LCEL chain
+- [x] `POST /gigs/recommend-agent` — same pipeline as a LangGraph state graph (query → retrieve → generate → respond)
+- [ ] Multi-agent layer (router + matcher + explainer agents) — Week 2
 - [ ] Dockerize + deploy
 
 ## Local setup

@@ -5,6 +5,8 @@ from app.database import get_db
 from app.models.gig import Gig
 from app.schemas.gig import GigCreate, GigOut, GigRecommendResponse, GigSearchQuery, GigSearchResult
 from app.services.embeddings import embed_text, gig_to_text
+from app.services.langchain_rag import add_gig_to_store, recommend_gigs_langchain
+from app.services.langgraph_rag import recommend_gigs_langgraph
 from app.services.rag import recommend_gigs
 from app.services.vector_store import vector_store
 
@@ -29,6 +31,9 @@ def create_gig(gig: GigCreate, db: Session = Depends(get_db)):
     text = gig_to_text(new_gig.title, new_gig.description, new_gig.required_skills or [])
     embedding = embed_text(text)
     vector_store.add(new_gig.id, embedding)
+
+    # Keep the LangChain-based store (Day 5) in sync too.
+    add_gig_to_store(new_gig)
 
     return new_gig
 
@@ -77,4 +82,35 @@ def recommend(query: GigSearchQuery, db: Session = Depends(get_db)):
     except Exception as e:
         # Surface the real error in the response instead of a generic 500 —
         # makes debugging LLM/API-key issues much faster during development.
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/recommend-langchain", response_model=GigRecommendResponse)
+def recommend_langchain(query: GigSearchQuery, db: Session = Depends(get_db)):
+    """
+    Day 5: the same RAG pipeline as /recommend, rebuilt using LangChain's
+    retriever + chain abstractions instead of raw FAISS/sentence-transformers
+    calls. Compare the response here against /recommend for the same query —
+    the results should be near-identical, since it's the same underlying
+    model and data, just different plumbing.
+    """
+    try:
+        return recommend_gigs_langchain(db, query.profile_text, top_k=query.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/recommend-agent", response_model=GigRecommendResponse)
+def recommend_agent(query: GigSearchQuery, db: Session = Depends(get_db)):
+    """
+    Day 6: the same pipeline, restructured as a LangGraph state graph
+    (query -> retrieve -> generate -> respond) instead of a linear LCEL
+    chain. Results should match /recommend-langchain closely — the point
+    of Day 6 isn't a different output, it's a different, more extensible
+    shape: this graph is what Week 2's multi-agent layer (routing,
+    win-likelihood scoring, tool-calling) gets added onto.
+    """
+    try:
+        return recommend_gigs_langgraph(db, query.profile_text, top_k=query.top_k)
+    except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")

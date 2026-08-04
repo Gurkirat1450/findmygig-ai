@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.database import Base, SessionLocal, engine
 from app.models import gig as gig_model  # noqa: F401 — import so SQLAlchemy registers the model
 from app.routers import gigs, health
+from app.services import langchain_rag
 from app.services.embeddings import embed_text, gig_to_text
 from app.services.vector_store import vector_store
 
@@ -30,6 +31,8 @@ def rebuild_vector_index():
         for g in db.query(gig_model.Gig).all():
             text = gig_to_text(g.title, g.description, g.required_skills or [])
             vector_store.add(g.id, embed_text(text))
+        # Also build the Day 5 LangChain-based store from the same data.
+        langchain_rag.get_or_build_store(db)
     finally:
         db.close()
 

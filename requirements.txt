@@ -7,7 +7,11 @@ psycopg2-binary==2.9.9
 sentence-transformers==3.1.1
 faiss-cpu==1.9.0
 google-generativeai==0.8.3
+langchain==0.3.7
+langchain-community==0.3.5
+langchain-huggingface==0.1.2
+langchain-google-genai==2.0.5
+langgraph==0.2.53
 
-# Coming in Week 1-2:
-# langchain
-# langgraph
+# Coming in Week 2:
+# crewai / autogen
