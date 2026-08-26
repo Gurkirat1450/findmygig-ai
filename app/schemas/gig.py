@@ -36,3 +36,14 @@ class GigSearchResult(BaseModel):
 class GigRecommendResponse(BaseModel):
     gigs: list[GigOut]
     explanation: str
+
+
+class GigChatQuery(BaseModel):
+    message: str = Field(
+        ...,
+        examples=["What gigs need Docker?", "Has Beta Labs posted before?"],
+    )
+
+
+class GigChatResponse(BaseModel):
+    response: str

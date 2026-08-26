@@ -3,7 +3,16 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.gig import Gig
-from app.schemas.gig import GigCreate, GigOut, GigRecommendResponse, GigSearchQuery, GigSearchResult
+from app.schemas.gig import (
+    GigChatQuery,
+    GigChatResponse,
+    GigCreate,
+    GigOut,
+    GigRecommendResponse,
+    GigSearchQuery,
+    GigSearchResult,
+)
+from app.services.agent_tools import chat_with_tools
 from app.services.embeddings import embed_text, gig_to_text
 from app.services.langchain_rag import add_gig_to_store, recommend_gigs_langchain
 from app.services.langgraph_rag import recommend_gigs_langgraph
@@ -112,5 +121,18 @@ def recommend_agent(query: GigSearchQuery, db: Session = Depends(get_db)):
     """
     try:
         return recommend_gigs_langgraph(db, query.profile_text, top_k=query.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/chat", response_model=GigChatResponse)
+def chat(query: GigChatQuery):
+    """
+    Tool-calling agent. Unlike /recommend (always uses semantic search),
+    this lets the LLM decide whether to call filter_gigs_by_skill,
+    get_client_gig_history, or just answer directly.
+    """
+    try:
+        return {"response": chat_with_tools(query.message)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
