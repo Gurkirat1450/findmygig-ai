@@ -9,6 +9,8 @@ from app.schemas.gig import (
     GigCreate,
     GigOut,
     GigRecommendResponse,
+    GigRouteQuery,
+    GigRouteResponse,
     GigSearchQuery,
     GigSearchResult,
 )
@@ -16,7 +18,10 @@ from app.services.agent_tools import chat_with_tools
 from app.services.embeddings import embed_text, gig_to_text
 from app.services.langchain_rag import add_gig_to_store, recommend_gigs_langchain
 from app.services.langgraph_rag import recommend_gigs_langgraph
+from app.services.multi_agent import run_multi_agent
+from app.schemas.gig import GigMultiAgentResponse
 from app.services.rag import recommend_gigs
+from app.services.router import route_query
 from app.services.vector_store import vector_store
 
 router = APIRouter()
@@ -134,5 +139,33 @@ def chat(query: GigChatQuery):
     """
     try:
         return {"response": chat_with_tools(query.message)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/route", response_model=GigRouteResponse)
+def route(query: GigRouteQuery, db: Session = Depends(get_db)):
+    """
+    Day 2: semantic router. One entry point — classifies the query via
+    embedding similarity (not hardcoded keywords) and dispatches to
+    either the tool-calling agent (exact lookups) or the LangGraph RAG
+    pipeline (fuzzy recommendations).
+    """
+    try:
+        return route_query(db, query.message, top_k=query.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/multi-agent", response_model=GigMultiAgentResponse)
+def multi_agent(query: GigSearchQuery, db: Session = Depends(get_db)):
+    """
+    Day 3: two specialized agents sharing state — a Matcher agent (LLM,
+    explains fit) and a Win-Likelihood Scorer agent (pure computation,
+    scores skill overlap + client history), running off the same
+    retrieved gigs and joining before the response.
+    """
+    try:
+        return run_multi_agent(db, query.profile_text, top_k=query.top_k)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")

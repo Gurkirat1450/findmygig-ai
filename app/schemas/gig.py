@@ -47,3 +47,27 @@ class GigChatQuery(BaseModel):
 
 class GigChatResponse(BaseModel):
     response: str
+
+
+class GigRouteQuery(BaseModel):
+    message: str = Field(..., examples=["What gigs need Docker?", "Recommend gigs for a Python developer"])
+    top_k: int = Field(default=5, ge=1, le=20)
+
+
+class GigRouteResponse(BaseModel):
+    route: str
+    confidence: float
+    response: str
+    gigs: list[GigOut] | None = None
+
+
+class GigWinLikelihood(BaseModel):
+    gig_id: int
+    score: float
+    note: str
+
+
+class GigMultiAgentResponse(BaseModel):
+    gigs: list[GigOut]
+    fit_explanation: str
+    win_likelihood: list[GigWinLikelihood]
