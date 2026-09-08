@@ -71,3 +71,9 @@ class GigMultiAgentResponse(BaseModel):
     gigs: list[GigOut]
     fit_explanation: str
     win_likelihood: list[GigWinLikelihood]
+
+
+class GigCrewAIResponse(BaseModel):
+    gigs: list[GigOut]
+    matcher_output: str
+    scorer_output: str

@@ -12,6 +12,16 @@ langchain-community==0.4.2
 langchain-huggingface==1.2.2
 langchain-google-genai==4.3.5
 langgraph==1.2.11
+crewai==0.86.0
+setuptools<81   # crewai 0.86.0's telemetry module does `import pkg_resources`,
+                # which setuptools>=81 removed (PEP 632) — pin below that.
+litellm==1.53.9 # crewai 0.86.0 pulls the latest litellm by default, whose newer
+                # code uses `typing.NotRequired` (Python 3.11+ only) — this repo
+                # runs 3.10, so pin to litellm's contemporary-with-crewai-0.86.0 version.
+httpx==0.27.2   # litellm==1.53.9 needs httpx<0.28; this is one version behind what
+                # google-genai (via langchain-google-genai) asks for, but both
+                # libraries work fine against 0.27.2 in practice.
+scikit-learn
 
 # Coming in Week 2:
-# crewai / autogen
+# autogen

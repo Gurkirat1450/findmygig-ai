@@ -15,6 +15,8 @@ from app.schemas.gig import (
     GigSearchResult,
 )
 from app.services.agent_tools import chat_with_tools
+from app.services.crewai_agents import run_crewai_multi_agent
+from app.schemas.gig import GigCrewAIResponse
 from app.services.embeddings import embed_text, gig_to_text
 from app.services.langchain_rag import add_gig_to_store, recommend_gigs_langchain
 from app.services.langgraph_rag import recommend_gigs_langgraph
@@ -167,5 +169,20 @@ def multi_agent(query: GigSearchQuery, db: Session = Depends(get_db)):
     """
     try:
         return run_multi_agent(db, query.profile_text, top_k=query.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/multi-agent-crewai", response_model=GigCrewAIResponse)
+def multi_agent_crewai(query: GigSearchQuery, db: Session = Depends(get_db)):
+    """
+    Day 4: the same Matcher + Win-Likelihood flow from Day 3, reimplemented
+    in CrewAI for direct orchestration-style comparison. Costs more Gemini
+    calls per run than the LangGraph version, since every CrewAI agent
+    (including the scorer, which is pure arithmetic in the LangGraph
+    version) reasons through an LLM.
+    """
+    try:
+        return run_crewai_multi_agent(db, query.profile_text, top_k=query.top_k)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")

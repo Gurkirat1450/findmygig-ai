@@ -71,6 +71,10 @@ The same pipeline is implemented three ways in this repo, each building on the l
 - [ ] **Week 3:** Kubernetes, MLflow, CI/CD, cloud deployment
 - [ ] **Week 4:** Evaluation metrics, robustness testing, polish
 
+## Known limitations
+
+**`POST /gigs/multi-agent-crewai` (Day 4, Week 2)** — implemented and verified up to a genuine upstream bug in CrewAI's Gemini integration: CrewAI's native Gemini message formatter doesn't guard against a conversation ending on a "model" (assistant) turn, which Gemini 3.x's API now strictly rejects (Google removed support for prefilled model turns). Tried the documented community workaround (rolling back to an older Gemini model) — it no longer holds, since Google appears to have broadened the restriction across more of the 3.x model family since that workaround was reported. Tracked upstream at [crewAIInc/crewAI#6984](https://github.com/crewAIInc/crewAI/issues/6984). The LangGraph multi-agent implementation (`/gigs/multi-agent`, Day 3) is unaffected and fully working — it doesn't route through CrewAI's message formatting at all.
+
 ## Running it — Docker (recommended)
 
 ```bash
